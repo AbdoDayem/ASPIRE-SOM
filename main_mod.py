@@ -53,36 +53,36 @@ class CustomSOM(MiniSom):
         print('Hello World!')
 
     # finding the nearest neighbors for the BMU
-    def _nearest_neighbors(self, bmu_index):
+    def _nearest_neighbors(self, bmu_index, radius, msize):
         neighbors = []
         
-        for dx in range(-NRADIUS, NRADIUS + 1):
-            for dy in range(-NRADIUS, NRADIUS + 1):
+        for dx in range(-radius, radius + 1):
+            for dy in range(-radius, radius + 1):
                 
                 if (dx, dy) != (0, 0):
                     neighbor_x = bmu_index[0] + dx
                     neighbor_y = bmu_index[1] + dy
                     
-                    if 0 <= neighbor_x < MSIZE[0] and 0 <= neighbor_y < MSIZE[1]:
+                    if 0 <= neighbor_x < msize[0] and 0 <= neighbor_y < msize[1]:
                         neighbors.append((neighbor_x, neighbor_y))
         
         return neighbors    
     
-    def _get_feature_neighborhood_vector(self, som, bmu_index, radius):
+    def _get_feature_neighborhood_vector(self, bmu_index, radius, msize):
         x_bmu, y_bmu = bmu_index
         neighborhood_weights = []
         
         # iterating over the neighborhood
-        for x in range(max(0, x_bmu - radius), min(MSIZE[0], x_bmu + radius + 1)):
-            for y in range(max(0, y_bmu - radius), min(MSIZE[1], y_bmu + radius + 1)):
-                neighborhood_weights.append(som.get_weights()[x, y])
+        for x in range(max(0, x_bmu - radius), min(msize[0], x_bmu + radius + 1)):
+            for y in range(max(0, y_bmu - radius), min(msize[1], y_bmu + radius + 1)):
+                neighborhood_weights.append(self.get_weights()[x, y])
         
         feature_neighborhood_vector = np.hstack(neighborhood_weights)
         
         return feature_neighborhood_vector
 
-    def train_random(self, X_train, ITERATIONS, verbose):
-        super().train_random(X_train, ITERATIONS, verbose)
+    def train_random(self, X_train, iterations, verbose):
+        super().train_random(X_train, iterations, verbose)
         
         # update the map neighborhood vector based on the feature vector
         print('Hello World!')

@@ -68,7 +68,7 @@ class CustomSOM(MiniSom):
         
         return neighbors    
     
-    def _get_feature_neighborhood_vector(som, bmu_index, radius):
+    def _get_feature_neighborhood_vector(self, som, bmu_index, radius):
         x_bmu, y_bmu = bmu_index
         neighborhood_weights = []
         

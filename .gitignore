@@ -1,1 +1,4 @@
 *.wav
+*.csv
+soundfiles/
+csv_files/

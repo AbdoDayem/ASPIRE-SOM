@@ -69,13 +69,3 @@ if not os.path.exists('./som_files/' + SOM_NAME):
     os.makedirs('./som_files/' + SOM_NAME)
 with open('./som_files/' + SOM_NAME + "/som.p", 'wb') as outfile:
     pickle.dump(som, outfile)
-
-
-
-
-
-
-
-
-
-

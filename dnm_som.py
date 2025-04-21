@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import soundfile as sf
 import minisom
@@ -5,6 +6,97 @@ from minisom import MiniSom
 import scipy.spatial.distance as ds
 
 class DNM_SOM(MiniSom):
+    def train(self, data, num_iteration,
+              random_order=False, verbose=False, use_epochs=False):
+        """Trains the SOM.
+
+        Parameters
+        ----------
+        data : np.array or list
+            Data matrix.
+
+        num_iteration : int
+            If use_epochs is False, the weights will be
+            updated num_iteration times. Otherwise they will be updated
+            len(data)*num_iteration times.
+
+        random_order : bool (default=False)
+            If True, samples are picked in random order.
+            Otherwise the samples are picked sequentially.
+
+        verbose : bool (default=False)
+            If True the status of the training will be
+            printed each time the weights are updated.
+
+        use_epochs : bool (default=False)
+            If True the SOM will be trained for num_iteration epochs.
+            In one epoch the weights are updated len(data) times and
+            the learning rate is constat throughout a single epoch.
+        """
+        self._check_iteration_number(num_iteration)
+        self._check_input_len(data)
+        random_generator = None
+        if random_order:
+            random_generator = self._random_generator
+        iterations = minisom._build_iteration_indexes(len(data), num_iteration,
+                                              verbose, random_generator,
+                                              use_epochs)
+        if use_epochs:
+            def get_decay_rate(iteration_index, data_len):
+                return int(iteration_index / data_len)
+        else:
+            def get_decay_rate(iteration_index, data_len):
+                return int(iteration_index)
+        for t, iteration in enumerate(iterations):
+            decay_rate = get_decay_rate(t, len(data))
+            self.update(data[iteration], self.winner(data[iteration]),
+                        decay_rate, num_iteration)
+        if verbose:
+            print('\n quantization error:', self.quantization_error(data))
+
+    def train_post(self, data, num_iteration,
+              random_order=False, verbose=False, use_epochs=False):
+        """Trains the SOM.
+
+        Parameters
+        ----------
+        data : np.array or list
+            Data matrix.
+
+        num_iteration : int
+            If use_epochs is False, the weights will be
+            updated num_iteration times. Otherwise they will be updated
+            len(data)*num_iteration times.
+
+        random_order : bool (default=False)
+            If True, samples are picked in random order.
+            Otherwise the samples are picked sequentially.
+
+        verbose : bool (default=False)
+            If True the status of the training will be
+            printed each time the weights are updated.
+
+        use_epochs : bool (default=False)
+            If True the SOM will be trained for num_iteration epochs.
+            In one epoch the weights are updated len(data) times and
+            the learning rate is constat throughout a single epoch.
+        """
+        self._check_iteration_number(num_iteration)
+        self._check_input_len(data)
+        if use_epochs:
+            def get_decay_rate(iteration_index, data_len):
+                return int(iteration_index / data_len)
+        else:
+            def get_decay_rate(iteration_index, data_len):
+                return int(iteration_index)
+        for t in range(num_iteration):
+            decay_rate = get_decay_rate(t, len(data))
+            self.update_post(data[t], self.winner(data[t]),
+                        decay_rate, num_iteration)
+        if verbose:
+            print('\n quantization error:', self.quantization_error(data))
+    
+    
     # finding the nearest neighbors for the BMU
     def _nearest_neighbors(self, bmu_index, radius, msize):
         neighbors = []
@@ -32,7 +124,7 @@ class DNM_SOM(MiniSom):
         
         return feature_neighborhood_vector
 
-    def update(self, x, win, t, max_iteration):
+    def update_post(self, x, win, t, max_iteration):
             """Updates the weights of the neurons.
 
             Parameters
@@ -65,10 +157,11 @@ class DNM_SOM(MiniSom):
             for i, j in feature_nh:
                if (g[i][j] != 0) and ([i ,j] != win):
                    replace_crd = map_nh[count]
-                   node_wts = self._weights[i][j]
-                   replace_wts = self._weights[replace_crd[0]][replace_crd[1]]
-                   self._weights[replace_crd[0]][replace_crd[1]] = node_wts
-                   self._weights[i][j] = replace_wts
+                   node_wts = copy.deepcopy(self._weights[i][j])
+                   replace_wts = copy.deepcopy(self._weights[replace_crd[0]][replace_crd[1]])
+                   self._weights[replace_crd[0]][replace_crd[1]] = copy.deepcopy(node_wts)
+                   self._weights[i][j] = copy.deepcopy(replace_wts)
+                   #print("_______")
+                   #print(replace_crd)
+                   #print([i, j])
                    count += 1
-
-            self._weights += np.einsum('ij, ijk->ijk', g, x-self._weights)

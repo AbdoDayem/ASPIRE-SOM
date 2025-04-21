@@ -1,14 +1,9 @@
 import glob
 import os
 import numpy as np
-import soundfile as sf
-from minisom import MiniSom
 from tqdm import tqdm
-import classifiers
 import pickle
 import librosa
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
 from sklearn.decomposition import PCA
 
 DATASET = "16000_pcm_speeches"
@@ -50,19 +45,3 @@ def pca_matrix(dataset, audio_time, components):
     data = pca.fit_transform(data)
     with open('./data_files/' + DATASET + "/" + str(AUDIO_TIME) + "sec_" + str(PCA_COMPONENTS) + "PCA_data.p", 'wb') as outfile:
         pickle.dump(data, outfile)
-
-mfcc_arr(DATASET, AUDIO_TIME)
-pca_matrix(DATASET, AUDIO_TIME, PCA_COMPONENTS)
-
-
-
-
-
-
-
-
-
-
-
-
-

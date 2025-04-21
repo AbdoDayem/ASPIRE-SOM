@@ -1,5 +1,5 @@
 import numpy as np
-import dnm_som
+import dnn_som.dnm_som as dnm_som
 import minisom
 
 def classify_BMU(som, X_test, X_train, y_train):

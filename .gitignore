@@ -1,6 +1,4 @@
 *.wav
 *.csv
 *.p
-soundfiles/
-data_files/
-som_files/
+*.pyc
